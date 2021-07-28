@@ -29,53 +29,68 @@ makePrisms ''Shape
 
 main :: IO ()
 main = do
+
   -- Getters
   print $ view _1 ('a', 'b')                            -- 'a'
   print $ ('a', 'b') ^. _1                              -- 'a'
   print $ view title nineteenEightyFour                 -- "Nineteen Eighty-Four"
   print $ nineteenEightyFour ^. title                   -- "Nineteen Eighty-Four"
+
   -- Lens composition
-  print $ view (author . surname) nineteenEightyFour    -- "Orwell
+  print $ ('a', ("b1", "b2"))  ^. _2._1                 -- "b1"
+  print $ view (author . surname) nineteenEightyFour    -- "Orwell"
+
   -- Setters
   print $ set _1 "apple" ("banana", "orange")           -- ("apple","orange")
   print $ _1 .~ "apple" $ ("banana", "orange")          -- ("apple","orange")
   print $ set title "1984" nineteenEightyFour           -- Book {_title = "1984", _author = Name {_firstName = "George", _surname = "Orwell"}}
   print $ title .~ "1984" $ nineteenEightyFour          -- Book {_title = "1984", _author = Name {_firstName = "George", _surname = "Orwell"}}
-  -- Setters that also return result
+
+  -- Setters that also return a result
   print $ ('a','b') & _1 <.~ 'c'                        -- ('c',('c','b'))
   print $ title <.~ "1984" $ nineteenEightyFour         -- ("1984",Book {_title = "1984", _author = Name {_firstName = "George", _surname = "Orwell"}})
-  -- Setters that also return old value
+
+  -- Setters that also return the old value
   print $ ('a','b') & _1 <<.~ 'c'                       -- ('a',('c','b'))
   print $ title <<.~ "1984" $ nineteenEightyFour        -- ("Nineteen Eighty-Four",Book {_title = "1984", _author = Name {_firstName = "George", _surname = "Orwell"}})
+
   -- Function application
   print $ over _2 (+100) ("dalmations", 1)              -- ("dalmations",101)
   print $ _2 %~ (+100) $ ("dalmations", 1)              -- ("dalmations",101)
   print $ over title (++"!!!") nineteenEightyFour       -- Book {_title = "Nineteen Eighty-Four!!!", _author = Name {_firstName = "George", _surname = "Orwell"}}
   print $ title %~ (++"!!!") $ nineteenEightyFour       -- Book {_title = "Nineteen Eighty-Four!!!", _author = Name {_firstName = "George", _surname = "Orwell"}}
-  -- Function application that also returns result
+
+  -- Function application that also returns a result
   print $ _2 <%~ (+100) $ ("dalmations", 1)             -- (101,("dalmations",101))
   print $ title <%~ (++"!!!") $ nineteenEightyFour      -- ("Nineteen Eighty-Four!!!",Book {_title = "Nineteen Eighty-Four!!!", _author = Name {_firstName = "George", _surname = "Orwell"}})
-  -- Function application that also returns old value
+
+  -- Function application that also returns the old value
   print $ _2 <<%~ (+100) $ ("dalmations", 1)            -- (1,("dalmations",101))
   print $ title <<%~ (++"!!!") $ nineteenEightyFour     -- ("Nineteen Eighty-Four",Book {_title = "Nineteen Eighty-Four!!!", _author = Name {_firstName = "George", _surname = "Orwell"}})
 
   -- Stateful getters
   print $ evalState (use _1) ("hello","world")          -- "hello"
   print $ evalState (use title) nineteenEightyFour      -- "Nineteen Eighty-Four"
+
   -- Stateful setters
   print $ execState (assign _1 'c') ('a','b')                -- ('c','b')
   print $ execState (_1 .= 'c') ('a','b')                    -- ('c','b')
   print $ execState (assign title "1984") nineteenEightyFour -- Book {_title = "1984", _author = Name {_firstName = "George", _surname = "Orwell"}}
   print $ execState (title .= "1984") nineteenEightyFour     -- Book {_title = "1984", _author = Name {_firstName = "George", _surname = "Orwell"}}
   print $ execState (do _1 .= 'c'; _2 .= 'd') ('a','b')      -- ('c','d')
+
   -- Stateful setters that also return result
   print $ runState (_1 <.= 'c') ('a','b')                    -- ('c',('c','b'))
+
   -- Stateful setters that also return old values
   print $ runState (_1 <<.= 'c') ('a','b')                   -- ('a',('c','b'))
+
   -- Stateful function application
   print $ execState (_2 %= tail) ("hello","world")           -- ("hello","orld")
+
   -- Stateful function application that also returns result
   print $ runState (_2 <%= tail) ("hello","world")           -- ("orld",("hello","orld"))
+
   -- Stateful function application that also returns old value
   print $ runState (_2 <<%= tail) ("hello","world")          -- ("world",("hello","orld"))
 
